@@ -1,0 +1,109 @@
+// CI PIPELINE
+
+pipeline{
+	agent any
+	parameters{
+		string(name: "VERSION NUMBER" , defaultValue: "", trim:true,description: "Please type Version Number is required for Ex:1.0.0 here")
+		string(name: "IMAGENO" , defaultValue: "",trim:true, description: "Please type ECR image number here")
+	}
+	
+	stages{
+			stage("Parameter check"){
+				steps{
+					script{
+						try{
+							if(params.IMAGENO.isEmpty()){
+								currentBuild.result = "ABORTED"
+									error("IMAGENO is empty")
+								}
+							}
+						catch(Exception e){
+							echo 'Exception occured:' + e.tostring()
+							sh 'Handle the exception!'
+						}
+					}
+				}
+		}
+	
+	stage('Clean Workspace'){
+		steps{
+		
+		cleanWs()
+		}
+	}
+	
+	stage('checkout'){
+		steps{
+			script{
+				try{
+					git branch: "branch Name", credentials: "Git", url:" "
+					sh "git branch -a"
+				
+				}
+				catch(exception e){
+					echo 'Exception occured:' + e.tostring()
+					sh 'Handle the exception!'
+				}
+			}
+		}
+	}
+	
+	stage ('Checking Tools'){
+		steps{
+			sh "mvn-version"
+			sh "java-version"
+			sh "docker info"
+			
+		}
+	}
+	
+	stage('Building Docker Image')
+		steps{
+			script{
+				try{
+					sh "rm -r .meteor"
+					sh "wget -q0 -https://install.meteor.com | sh"
+				}
+				catch(exception e){
+					echo 'Exception occured:' + e.tostring()
+					sh 'Handle the exception!'
+				}
+			}
+		}
+	}
+	
+	stage('Listing docker images'){
+		steps{
+			script{
+				try{
+					sh "docker images | grep service"
+				}
+				catch(exception e){
+					echo 'Exception occured:' + e.tostring()
+					sh 'Handle the exception!'
+				}
+			}
+		}
+	}
+	
+	stage('Pushing to ECR'){
+		steps{
+			script{
+				try{
+					sh "gcr.io/${env.GKE_PROJECT_ID}/your-image-name:${IMAGENO}"
+				}
+				catch(exception e){
+					echo 'Exception occured:' + e.tostring()
+					sh 'Handle the exception!'
+				}
+			}
+		}
+	}
+	
+	stage("Docker clean"){
+		steps{
+			script{
+				sh " docker image prune -af"
+			}
+		}
+	}

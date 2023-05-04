@@ -1,0 +1,27 @@
+// this file contains the default values for the chart, which can be overridden by the user during installation
+
+replicaCount: 1
+image:
+  repository: https://github.com/kimoai/DevOps-task
+  tag: 102
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 8080
+ingress:
+  enabled: true
+  host: my-microservice.service.com
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+  - secretName: my-microservice-tls
+    hosts:
+    - my-microservice.service.com
+resources:
+	limits:
+        cpu: 100m
+        memory: 128Mi
+    requests:
+        cpu: 100m
+        memory: 128Mi

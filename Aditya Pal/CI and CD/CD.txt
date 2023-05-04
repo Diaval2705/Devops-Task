@@ -1,0 +1,27 @@
+// CD Pipeline
+
+Pipeline{
+	agent any
+	Parameters {
+	string(name: "IMAGENO" , defaultValue: "",trim:true, description: "Please type ECR image number here")
+	}
+	
+	
+	stage('Deploy to GKE') {
+            steps {
+                script {
+                    // Authenticate to GCP and configure kubectl
+                    withCredentials([file(credentialsId: 'gcp-service-account-key', variable: 'GOOGLE_APPLICATION_CREDENTIALS')]) {
+                        sh "gcloud auth activate-service-account ${env.SERVICE_ACCOUNT_NAME} --key-file=${env.GOOGLE_APPLICATION_CREDENTIALS}"
+                        sh "gcloud container clusters get-credentials ${env.GKE_CLUSTER_NAME} --zone=${env.us-east-1} --project=${env.GKE_PROJECT_ID}"
+                        sh "kubectl config use-context gke_${env.GKE_PROJECT_ID}_${env.us-east-1}_${env.GKE_CLUSTER_NAME}"
+                    }
+
+                    // Install or upgrade the HELM chart
+                    sh "helm upgrade --install ${env.sevices} ${env.services_to} --namespace=default --set image.repository=gcr.io/${env.GKE_PROJECT_ID}/your-image-name,image.tag=${IMAGENO}"
+                }
+            }
+		}
+	}
+	
+	

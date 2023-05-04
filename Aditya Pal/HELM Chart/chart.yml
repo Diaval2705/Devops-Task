@@ -1,0 +1,15 @@
+// HELM CHART
+// this file contains the metadata about the chart, such as its name and version
+
+
+apiVersion: v2
+name: my-microservice
+version: 0.1.0
+description: A HELM chart for deploying my-microservice to Kubernetes.
+type: The type of the chart
+keywords:
+dependenices:
+    -name: nginx
+     version: 1.2.3
+     repository: https://github.com/kimoai/DevOps-task
+     tags: 

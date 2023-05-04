@@ -1,0 +1,25 @@
+// This file contains the ingress template 
+
+{{- if .Values.ingress.enabled -}}
+apiVersion: v2
+kind: Ingress
+metadata:
+  name: {{ include "my-microservice.fullname" . }}
+  annotations:
+{{ toYaml .Values.ingress.annotations | indent 4 }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "my-microservice.fullname" . }}
+                port:
+                  name: http
+  tls:
+  - hosts:
+      - {{ .Values.ingress.host }}
+    secretName: {{ include "my-micro
